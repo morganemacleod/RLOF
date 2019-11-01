@@ -131,7 +131,7 @@ class RLOF:
         or manually. 
         Pols eqn 7.5
         """
-        rL = self.a_o_RL(md/ma)**-1 * a
+        rL = self.a_o_RL(ma/md)**-1 * a
         if mdot_mode=='simulation':
             alpha = self.approx_alpha(ma/md,fcorot,gad,gs)
         elif mdot_mode=='manual':
@@ -140,6 +140,7 @@ class RLOF:
             print("MDOT MODE NOT RECOGNIZED")
             
         mdot = -alpha*md/self.p_orb(md+ma,a)*((rd-rL)/rd)**((3.*gs-1)/(2*gs-2))
+        
         if mdot<0:
             return mdot
         else:
