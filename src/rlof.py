@@ -33,6 +33,7 @@ class RLOF:
                  Ggrav=6.674e-8,
                  a0_mode = 'Roche_limit_fraction',
                  a0 = 1.e11,
+                 P0=86400.0,
                  f_roche_limit=0.99,
                  Rdfunc=None,
                  fcorot0=1.0,
@@ -46,8 +47,9 @@ class RLOF:
         Rd0=7e10,               # initial donor radius
         Ra0=0.0,                # initial accretor radius (must be >0 if acc_mode='eddington' in integrate)
         Ggrav=6.674e-8,         # gravitational constant (sets unit system)
-        a0_mode = 'Roche_limit_fraction',   # how to initialize the separation, options: manual, Roche_limit_fraction
+        a0_mode = 'Roche_limit_fraction',   # how to initialize the separation, options: manual, Roche_limit_fraction, period
         a0 = 1.e11,             # initial separation, if set with a0_mode='manual'
+        P0 = 86400.0            # initial target orbital period, if a0_mode='period'
         f_roche_limit=0.99,     # initial fraction of Roche limit separation given other params, if a0_mode=Roche_limit_fraction
         Rdfunc=None,            # donor-star radius function:  Rd/Rd0 = Rdfunc(Md/Md0) 
         fcorot0=1.0,            # initial degree of synchronization, range 0-1. 
@@ -69,8 +71,10 @@ class RLOF:
         
         if a0_mode == 'manual':
             self.a0  = a0
-        if a0_mode == 'Roche_limit_fraction':
+        elif a0_mode == 'Roche_limit_fraction':
             self.a0 = f_roche_limit * self.a_o_RL(self.Ma0/self.Md0) * self.Rd0
+        elif a0_mode == 'period':
+            self.a0 = (self.G*self.Mtot0 *(P0/(2*np.pi))**2 )**(1./3.)
             
         if Rdfunc==None:
             self.Rdfunc = self.Rdfunc_constant
@@ -230,7 +234,8 @@ class RLOF:
                   mdot_mode='simulation',
                   acc_mode="manual",
                   beta_manual=0.0,
-                  alpha_manual=1.0):
+                  alpha_manual=1.0,
+                  rtol=1.e-8):
         """ 
         Integrate the solution forward from the initial conditions to time = dt, saving Ntimes outputs. 
         Returns an astropy Table.
@@ -255,7 +260,10 @@ class RLOF:
                         t_span=(times[0],times[-1]),
                         y0=np.array(ic),
                         t_eval=times,
-                        events=(self.__event_CE))
+                        events=(self.__event_CE),
+                        method='BDF',
+                        rtol=rtol,
+                        atol=0.0)
         
         print ("---- integration ---------------")
         print ("solver message: ",ivp.message)
