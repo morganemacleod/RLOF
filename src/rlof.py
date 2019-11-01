@@ -38,7 +38,8 @@ class RLOF:
                  Rdfunc=None,
                  fcorot0=1.0,
                  gamma_adiabatic=5./3.,
-                 gamma_structure=5./3.):
+                 gamma_structure=5./3.,
+                 amin_integrate=None):
         
         """
         Parameters:
@@ -84,6 +85,12 @@ class RLOF:
         self.fcorot = fcorot0
         self.gamma_adiabatic = gamma_adiabatic
         self.gamma_structure = gamma_structure
+
+
+        if amin_integrate == None:
+            self.amin = self.Rd0
+        else:
+            self.amin = amin_integrate
             
         print("=== RLOF: binary defined =======")
         print("Md0 = ",self.Md0)
@@ -225,7 +232,7 @@ class RLOF:
     
     def __event_CE(self,t,vec):
         md,ma,a = vec
-        return self.Rd0 - a
+        return self.amin - a
     __event_CE.terminal = True
     
     
@@ -275,5 +282,6 @@ class RLOF:
         solT['t'] = ivp.t
         solT['Rd'] = self.Rdfunc(solT['Md']/self.Md0) * self.Rd0
         solT['Ra'] = self.Ra0
+        solT['dMddt']=np.gradient(solT['Md'])/np.gradient(solT['t'])
         
-        return solT[['t','Md','Rd','Ma','Ra','a']]
+        return solT[['t','Md','Rd','Ma','Ra','a','dMddt']]
