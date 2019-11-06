@@ -39,26 +39,45 @@ class RLOF:
                  fcorot0=1.0,
                  gamma_adiabatic=5./3.,
                  gamma_structure=5./3.,
-                 amin_integrate=None):
+                 amin_integrate=None,
+                 Mdtot=None):
         
         """
         Parameters:
+        
         Md0=2.e33,              # initial donor mass
+        
         Ma0=1.e33,              # initial accretor mass
+        
         Rd0=7e10,               # initial donor radius
+        
         Ra0=0.0,                # initial accretor radius (must be >0 if acc_mode='eddington' in integrate)
+        
         Ggrav=6.674e-8,         # gravitational constant (sets unit system)
+        
         a0_mode = 'Roche_limit_fraction',   # how to initialize the separation, options: manual, Roche_limit_fraction, period
+        
         a0 = 1.e11,             # initial separation, if set with a0_mode='manual'
+        
         P0 = 86400.0            # initial target orbital period, if a0_mode='period'
+        
         f_roche_limit=0.99,     # initial fraction of Roche limit separation given other params, if a0_mode=Roche_limit_fraction
+        
         Rdfunc=None,            # donor-star radius function:  Rd/Rd0 = Rdfunc(Md/Md0) 
+        
         fcorot0=1.0,            # initial degree of synchronization, range 0-1. 
+        
         gamma_adiabatic=5./3.,  # equation of state of donor, gamma_adiabatic , along an adiabat: P \propto \rho^gamma_adiabatic
+        
         gamma_structure=5./3.   # structural gamma of the donor star (polytropic gamma): gamma_structure=1+1/n
+        
         fcorot0=1.0,             # initial degree of binary corotation
+        
         gamma_adiabatic=5./3.,   # gas equation of state: adiabatic index
+        
         gamma_structure=5./3.    # polytropic index of the donor gamma_structure = 1 + 1/n
+        
+        Mdtot = None,            # original total mass of the donor (if Md0 is intended to be less than the original donor mass, as in starting part way through the donor mass radius relationship. 
         """
         
         self.c = Constants()
@@ -91,6 +110,11 @@ class RLOF:
             self.amin = self.Rd0
         else:
             self.amin = amin_integrate
+
+        if Mdtot == None:
+            self.Mdtot = Md0
+        else:
+            self.Mdtot = Mdtot
             
         print("=== RLOF: binary defined =======")
         print("Md0 = ",self.Md0)
@@ -101,6 +125,7 @@ class RLOF:
         print("G = ",self.G)
         print("----------donor star------------")
         print("Md0 = ",self.Md0)
+        print("Md(original) = ",self.Mdtot)
         print("Rd0 = ",self.Rd0)
         print("Rdfunc = ",self.Rdfunc)
         print("fcorot0 = ",self.fcorot)
@@ -109,7 +134,7 @@ class RLOF:
         print("================================")
         
             
-    def Rdfunc_constant(self,Mdonor_over_Md0):
+    def Rdfunc_constant(self,Mdonor_over_Mdtot):
         """ 
         default version of donor radius (R/R0) as a function of donor mass (M/M0)
             R/R0 = f(M/M0)
@@ -206,7 +231,7 @@ class RLOF:
         
         # donor
         # set donor radius
-        rd = self.Rdfunc(md/self.Md0)*self.Rd0
+        rd = self.Rdfunc(md/self.Mdtot)*self.Rd0
         # set mdot
         dmddt = self.mdot_donor(a,md,ma,rd,
                                 self.fcorot,self.gamma_adiabatic, self.gamma_structure,
@@ -280,7 +305,7 @@ class RLOF:
         
         solT = Table(data=ivp.y.T,names=['Md','Ma','a'])
         solT['t'] = ivp.t
-        solT['Rd'] = self.Rdfunc(solT['Md']/self.Md0) * self.Rd0
+        solT['Rd'] = self.Rdfunc(solT['Md']/self.Mdtot) * self.Rd0
         solT['Ra'] = self.Ra0
         solT['dMddt']=np.gradient(solT['Md'])/np.gradient(solT['t'])
         
