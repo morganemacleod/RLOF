@@ -182,7 +182,7 @@ class RLOF:
         """approximation of gamma_loss"""
         gloss_norm = 0.58*(q/0.1)**0.1 * (gad/(5/3.))**0.7 * (gs/(5/3.))**-2.23  * (1 - 0.36*(fcorot-1.) )
         gamma_donor = q
-        gamma_L2 = (1+q)**2/q * 1.26**2
+        gamma_L2 = (1+q)**2/q * 1.2**2
         return (gamma_L2-gamma_donor)*gloss_norm + gamma_donor
     
     def approx_alpha(self,q, fcorot, gad, gs):
@@ -220,7 +220,7 @@ class RLOF:
         elif loss_mode=='accretor':
             gamma = md/ma  # pols
         elif loss_mode=='l2':
-            gamma = (md+ma)**2/(md*ma) * 1.26**2  # pribula 
+            gamma = (md+ma)**2/(md*ma) * 1.2**2  # pribula 
         elif loss_mode=='simulation':
             gamma = self.approx_gamma(ma/md, self.fcorot, self.gamma_adiabatic, self.gamma_structure)
         else:
