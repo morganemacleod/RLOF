@@ -268,7 +268,8 @@ class RLOF:
                   acc_mode="manual",
                   beta_manual=0.0,
                   alpha_manual=1.0,
-                  rtol=1.e-8):
+                  rtol=1.e-8,
+                  return_ivp=False):
         """ 
         Integrate the solution forward from the initial conditions to time = dt, saving Ntimes outputs. 
         Returns an astropy Table.
@@ -281,9 +282,7 @@ class RLOF:
         acc_mode="manual",       # mode of accretion by the accretor, options: manual, eddington
         beta_manual=0.0,         # if acc_mode='manual', this is the fraction accreted by the accretor
         alpha_manual=1.0,        # if mdot_mode='manual', this is the normalization factor alpha
-        fcorot0=1.0,             # initial degree of binary corotation
-        gamma_adiabatic=5./3.,   # gas equation of state: adiabatic index
-        gamma_structure=5./3.    # polytropic index of the donor gamma_structure = 1 + 1/n
+        return_ivp=False,        # return the full ivp output from solve_ivp
         """
         
         ic = (self.Md0,self.Ma0,self.a0)
@@ -308,5 +307,8 @@ class RLOF:
         solT['Rd'] = self.Rdfunc(solT['Md']/self.Mdtot) * self.Rd0
         solT['Ra'] = self.Ra0
         solT['dMddt']=np.gradient(solT['Md'])/np.gradient(solT['t'])
-        
-        return solT[['t','Md','Rd','Ma','Ra','a','dMddt']]
+
+        if return_ivp==False:
+            return solT[['t','Md','Rd','Ma','Ra','a','dMddt']]
+        else:
+            return solT[['t','Md','Rd','Ma','Ra','a','dMddt']], ivp
