@@ -40,7 +40,8 @@ class RLOF:
                  gamma_adiabatic=5./3.,
                  gamma_structure=5./3.,
                  amin_integrate=None,
-                 Mdtot=None):
+                 Mdtot=None,
+                 verbose=True):
         
         """
         Parameters:
@@ -78,6 +79,8 @@ class RLOF:
         gamma_structure=5./3.    # polytropic index of the donor gamma_structure = 1 + 1/n
         
         Mdtot = None,            # original total mass of the donor (if Md0 is intended to be less than the original donor mass, as in starting part way through the donor mass radius relationship. 
+
+        verbose = True           # print information? 
         """
         
         self.c = Constants()
@@ -115,23 +118,24 @@ class RLOF:
             self.Mdtot = Md0
         else:
             self.Mdtot = Mdtot
-            
-        print("=== RLOF: binary defined =======")
-        print("Md0 = ",self.Md0)
-        print("Ma0 = ",self.Ma0)
-        print("Rd0 = ",self.Rd0)
-        print("Ra0 = ",self.Ra0)
-        print("a0 = ",self.a0)
-        print("G = ",self.G)
-        print("----------donor star------------")
-        print("Md0 = ",self.Md0)
-        print("Md(original) = ",self.Mdtot)
-        print("Rd0 = ",self.Rd0)
-        print("Rdfunc = ",self.Rdfunc)
-        print("fcorot0 = ",self.fcorot)
-        print("gamma_adiabatic = ",self.gamma_adiabatic)
-        print("gamma_structure = ",self.gamma_structure)
-        print("================================")
+
+        if(verbose==True):
+            print("=== RLOF: binary defined =======")
+            print("Md0 = ",self.Md0)
+            print("Ma0 = ",self.Ma0)
+            print("Rd0 = ",self.Rd0)
+            print("Ra0 = ",self.Ra0)
+            print("a0 = ",self.a0)
+            print("G = ",self.G)
+            print("----------donor star------------")
+            print("Md0 = ",self.Md0)
+            print("Md(original) = ",self.Mdtot)
+            print("Rd0 = ",self.Rd0)
+            print("Rdfunc = ",self.Rdfunc)
+            print("fcorot0 = ",self.fcorot)
+            print("gamma_adiabatic = ",self.gamma_adiabatic)
+            print("gamma_structure = ",self.gamma_structure)
+            print("================================")
         
             
     def Rdfunc_constant(self,Mdonor_over_Mdtot):
@@ -269,7 +273,8 @@ class RLOF:
                   beta_manual=0.0,
                   alpha_manual=1.0,
                   rtol=1.e-8,
-                  return_ivp=False):
+                  return_ivp=False,
+                  verbose=True):
         """ 
         Integrate the solution forward from the initial conditions to time = dt, saving Ntimes outputs. 
         Returns an astropy Table.
@@ -283,6 +288,7 @@ class RLOF:
         beta_manual=0.0,         # if acc_mode='manual', this is the fraction accreted by the accretor
         alpha_manual=1.0,        # if mdot_mode='manual', this is the normalization factor alpha
         return_ivp=False,        # return the full ivp output from solve_ivp
+        verbose = True           # print diagnostic output
         """
         
         ic = (self.Md0,self.Ma0,self.a0)
@@ -296,11 +302,12 @@ class RLOF:
                         method='BDF',
                         rtol=rtol,
                         atol=0.0)
-        
-        print ("---- integration ---------------")
-        print ("solver message: ",ivp.message)
-        print ("events: ",ivp.t_events)
-        print ("--------------------------------")
+
+        if (verbose==True):
+            print ("---- integration ---------------")
+            print ("solver message: ",ivp.message)
+            print ("events: ",ivp.t_events)
+            print ("--------------------------------")
         
         solT = Table(data=ivp.y.T,names=['Md','Ma','a'])
         solT['t'] = ivp.t

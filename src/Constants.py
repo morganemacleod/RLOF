@@ -17,7 +17,7 @@ class Constants():
         self.sigmaT = 6.6524e-25
         self.Rg = 8.3145e7
         
-        print ("Constants defined...")
+        #print ("Constants defined...")
         return None
     
 
