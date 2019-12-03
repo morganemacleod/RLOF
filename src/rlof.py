@@ -184,7 +184,7 @@ class RLOF:
     
     def approx_gamma(self,q, fcorot, gad, gs):
         """approximation of gamma_loss"""
-        gloss_norm = 0.58*(q/0.1)**0.1 * (gad/(5/3.))**0.7 * (gs/(5/3.))**-2.23  * (1 - 0.36*(fcorot-1.) )
+        gloss_norm = 0.66*(q/0.1)**0.08 * (gad/(5/3.))**0.69 * (gs/(5/3.))**-2.17  * (1 - 0.30*(fcorot-1.) )
         gamma_donor = q
         gamma_L2 = (1+q)**2/q * 1.2**2
         return (gamma_L2-gamma_donor)*gloss_norm + gamma_donor
