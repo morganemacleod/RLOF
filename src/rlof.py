@@ -319,3 +319,19 @@ class RLOF:
             return solT[['t','Md','Rd','Ma','Ra','a','dMddt']]
         else:
             return solT[['t','Md','Rd','Ma','Ra','a','dMddt']], ivp
+
+
+
+    
+    def rho_torus(self,R,z,K=1.,gamma=5./3.,l=2.,GM=1.,R0=100.):
+        """
+        definition of a constant angular momentum torus in HSE. parameters:
+        R,z cylindrical coords
+        K,gamma: P=K*rho^gamma, polytropic eos for the torus gas  
+        l = specific angular momentum 
+        GM = central mass*G
+        R0 = R at which density vanishes (outer radius)
+        """
+        r = np.sqrt(R**2 + z**2)
+        dens = ((gamma-1.)/(K*gamma) * (GM/r - l**2/(2*R**2) - GM/R0 + l**2/(2*R0**2)))**(1./(gamma-1))
+        return np.nan_to_num(dens)
