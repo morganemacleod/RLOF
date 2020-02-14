@@ -323,7 +323,7 @@ class RLOF:
 
 
     
-    def rho_torus(self,R,z,K=1.,gamma=5./3.,l=2.,GM=1.,R0=100.):
+    def rho_torus(self,R,z,K=1.,gamma=4./3.,l=2.,GM=1.,R0=100.):
         """
         definition of a constant angular momentum torus in HSE. parameters:
         R,z cylindrical coords
