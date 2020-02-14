@@ -337,13 +337,21 @@ class CircumbinaryTorus:
         R0 = R at which density vanishes (outer radius)
     """
 
-    def __init__(self):
+    def __init__(self,
+                 RLOF=None,GM=1.,K=1.,gamma=4./3.,l=2.,R0=100.):
 
-        self.GM = 1.
-        self.K = 1.
-        self.gamma = 4./3.
-        self.l = 2.
-        self.R0 = 100.
+        if RLOF==None:
+            print("manually initializing CircumbinaryTorus with supplied params")
+            self.GM = float(GM)
+            self.K = float(K)
+            self.gamma = float(gamma)
+            self.l = float(l)
+            self.R0 = float(R0)
+        else:
+            print("initializing CircumbinaryTorus based on RLOF definition")
+
+        
+        
 
 
         
@@ -354,6 +362,7 @@ class CircumbinaryTorus:
         """
         r = np.sqrt(R**2 + z**2)
         dens = ((self.gamma-1.)/(self.K*self.gamma) * (self.GM/r - self.l**2/(2*R**2) - self.GM/self.R0 + self.l**2/(2*self.R0**2)))**(1./(self.gamma-1))
+        dens = np.where(R>0,dens,0.0)
         return np.nan_to_num(dens)
 
 
@@ -363,7 +372,3 @@ class CircumbinaryTorus:
 
     def vphi_torus(self,R,z):
         return np.where( rho_torus(R,z) > 0, self.l / R, 0.0)
-
-
-    def plot_torus(self):
-        
