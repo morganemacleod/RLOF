@@ -327,25 +327,39 @@ class RLOF:
 
 
 class CircumbinaryTorus:
+    """ 
+    Class to model analytic, constant angular momentum circumbinary torus in hydrostatic equilibrium
 
-    def __init__(self):
-
-        
-
-
-        
-    def rho_torus(self,R,z,K=1.,gamma=4./3.,l=2.,GM=1.,R0=100.):
-        """
-        definition of a constant angular momentum torus in HSE. parameters:
-        R,z cylindrical coords
+    torus parameters are:
         K,gamma: P=K*rho^gamma, polytropic eos for the torus gas  
         l = specific angular momentum 
         GM = central mass*G
         R0 = R at which density vanishes (outer radius)
+    """
+
+    def __init__(self):
+
+        self.GM = 1.
+        self.K = 1.
+        self.gamma = 4./3.
+        self.l = 2.
+        self.R0 = 100.
+
+
+        
+    def rho_torus(self,R,z):
+        """
+        definition of a constant angular momentum torus in HSE. parameters:
+        R,z cylindrical coords
         """
         r = np.sqrt(R**2 + z**2)
-        dens = ((gamma-1.)/(K*gamma) * (GM/r - l**2/(2*R**2) - GM/R0 + l**2/(2*R0**2)))**(1./(gamma-1))
+        dens = ((self.gamma-1.)/(self.K*self.gamma) * (self.GM/r - self.l**2/(2*R**2) - self.GM/self.R0 + self.l**2/(2*self.R0**2)))**(1./(self.gamma-1))
         return np.nan_to_num(dens)
 
 
-    
+    def vphi_torus(self):
+        return 0.0
+
+
+    def plot_torus(self):
+        
