@@ -357,8 +357,12 @@ class CircumbinaryTorus:
         return np.nan_to_num(dens)
 
 
-    def vphi_torus(self):
-        return 0.0
+    def press_torus(self,R,z):
+        return self.K*self.rho_torus(R,z)**self.gamma
+
+
+    def vphi_torus(self,R,z):
+        return np.where( rho_torus(R,z) > 0, self.l / R, 0.0)
 
 
     def plot_torus(self):
