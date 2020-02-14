@@ -322,7 +322,18 @@ class RLOF:
 
 
 
-    
+
+
+
+
+class CircumbinaryTorus:
+
+    def __init__(self):
+
+        
+
+
+        
     def rho_torus(self,R,z,K=1.,gamma=4./3.,l=2.,GM=1.,R0=100.):
         """
         definition of a constant angular momentum torus in HSE. parameters:
@@ -335,3 +346,6 @@ class RLOF:
         r = np.sqrt(R**2 + z**2)
         dens = ((gamma-1.)/(K*gamma) * (GM/r - l**2/(2*R**2) - GM/R0 + l**2/(2*R0**2)))**(1./(gamma-1))
         return np.nan_to_num(dens)
+
+
+    
