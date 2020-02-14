@@ -193,6 +193,21 @@ class RLOF:
         """approximation of alpha_mdot"""
         alpha = 0.62*(q/0.1)**0.68 * (gad/(5/3.))**5.39 * (gs/(5/3.))**-3.25  * (1 - 0.89*(fcorot-1.) )
         return alpha
+
+    def gamma_loss(self,md,ma,loss_mode):
+        # loss of angular momentum
+        if loss_mode=='donor':
+            gamma = ma/md  # pols
+        elif loss_mode=='accretor':
+            gamma = md/ma  # pols
+        elif loss_mode=='l2':
+            gamma = (md+ma)**2/(md*ma) * 1.2**2  # pribula 
+        elif loss_mode=='simulation':
+            gamma = self.approx_gamma(ma/md, self.fcorot, self.gamma_adiabatic, self.gamma_structure)
+        else:
+            print("INVALID loss_mode")
+        return gamma
+            
     
     
     def derivs(self,t,vec,
@@ -217,19 +232,8 @@ class RLOF:
 
         # unpack    
         md,ma,a = vec
-
-        # loss of angular momentum
-        if loss_mode=='donor':
-            gamma = ma/md  # pols
-        elif loss_mode=='accretor':
-            gamma = md/ma  # pols
-        elif loss_mode=='l2':
-            gamma = (md+ma)**2/(md*ma) * 1.2**2  # pribula 
-        elif loss_mode=='simulation':
-            gamma = self.approx_gamma(ma/md, self.fcorot, self.gamma_adiabatic, self.gamma_structure)
-        else:
-            print("INVALID loss_mode")
-
+        gamma = self.gamma_loss(md,ma,loss_mode)
+  
 
         # derivatives
         
@@ -314,11 +318,12 @@ class RLOF:
         solT['Rd'] = self.Rdfunc(solT['Md']/self.Mdtot) * self.Rd0
         solT['Ra'] = self.Ra0
         solT['dMddt']=np.gradient(solT['Md'])/np.gradient(solT['t'])
-
+        solT['L'] = solT['Md']*solT['Ma']/(solT['Md']+solT['Ma']) * np.sqrt( self.G*(solT['Md']+solT['Ma'])*solT['a'] )
+        
         if return_ivp==False:
-            return solT[['t','Md','Rd','Ma','Ra','a','dMddt']]
+            return solT[['t','Md','Rd','Ma','Ra','a','dMddt','L']]
         else:
-            return solT[['t','Md','Rd','Ma','Ra','a','dMddt']], ivp
+            return solT[['t','Md','Rd','Ma','Ra','a','dMddt','L']], ivp
 
 
 
@@ -338,21 +343,53 @@ class CircumbinaryTorus:
     """
 
     def __init__(self,
-                 RLOF=None,GM=1.,K=1.,gamma=4./3.,l=2.,R0=100.):
+                 RLOFsol=None,Ggrav=6.674e-8,
+                 M=1.,K=1.,gamma=4./3.,l=2.,R0=100.):
 
-        if RLOF==None:
+        if RLOFsol == None:
             print("manually initializing CircumbinaryTorus with supplied params")
-            self.GM = float(GM)
+            self.GM = float(Ggrav*M)
             self.K = float(K)
             self.gamma = float(gamma)
             self.l = float(l)
             self.R0 = float(R0)
         else:
-            print("initializing CircumbinaryTorus based on RLOF definition")
+            print("initializing CircumbinaryTorus based on RLOF integration")
+            sol = RLOFsol.copy()
 
-        
-        
+            self.GM = Ggrav * (sol['Md'] + sol['Ma'])[-1]
 
+            # set gamma, R0
+            self.gamma = 4./3.
+            self.R0 = self.__R0_approx( sol['Ma'][0]/sol['Md'][0] )*sol['Rd'][0]
+
+            # set l based on solution from RLOF
+            self.Mtorus = (sol['Md'] + sol['Ma'])[0] - (sol['Md'] + sol['Ma'])[-1]
+            self.Ltorus = sol['L'][0] - sol['L'][-1]
+            self.l = self.Ltorus/self.Mtorus
+
+            # set K so that Mtorus is correct
+            self.K = 1.0
+            npoints = 1000
+            RR,zz = np.meshgrid(np.linspace(0,1.01*self.R0,npoints),np.linspace(0,1.01*self.R0,npoints))
+            dA = (RR[0,1]-RR[0,0])*(zz[1,0]-zz[0,0])
+            MK1 = np.sum(4*np.pi*RR*self.rho_torus(RR,zz)*dA)
+            self.K = (MK1/self.Mtorus)**(self.gamma-1.0)
+
+            print("Torus Params: ")
+            print(" K = ",self.K)
+            print(" GM = ",self.GM)
+            print(" gamma =",self.gamma)
+            print(" l = ",self.l)
+            print(" R0 = ",self.R0)
+  
+            
+            
+            
+        
+    def __R0_approx(self,q):
+        """ simple power law best fit to simulation results """ 
+        return 200.0 * q**0.64
 
         
     def rho_torus(self,R,z):
